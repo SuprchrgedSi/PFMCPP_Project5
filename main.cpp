@@ -110,7 +110,8 @@ int StandingDesk::maxOutHeight(float incrementSize)
     int numSteps = 0;
     while (deskHeight < maxHeight)
     {
-        if (maxHeight - deskHeight <= incrementSize){
+        if (maxHeight - deskHeight <= incrementSize)
+        {
             deskHeight = maxHeight;
             std:: cout << "Increased desk height by " << maxHeight - deskHeight << " inches.  Desk is now at max height of " << maxHeight  << " inches." << std::endl;
             ++numSteps;
@@ -184,7 +185,8 @@ void GuitarAmp::PowerAmp::enableAmpStandby()
     std::cout << "The power amp is now in standby." << std::endl;
     powerState = "standby"; 
     
-    if (waitUntilWarm(155.2)) std::cout << "The amp is ready for full power." << std::endl;
+    if (waitUntilWarm(155.2)) 
+        std::cout << "The amp is ready for full power." << std::endl;
 
 }
 
