@@ -156,7 +156,6 @@ int StandingDesk::maxOutHeight(float incrementSize)
 void StandingDesk::getDrawerPosition()
 {
     std::cout << "The desk drawer is currently " << this->drawerLocation << "." << std::endl;
-    this->slideDrawer();
 }
 
 void StandingDesk::reportRollDistance(double xDistance, double yDistance)
