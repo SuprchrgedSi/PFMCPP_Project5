@@ -94,6 +94,8 @@ namespace Example
     void changeHeight(float heightChange = 1.f);
     double rollDesk(double xDistance = 0.5, double yDistance = 0.5);
     int maxOutHeight(float incrementSize);
+    void getDrawerPosition();
+    void reportRollDistance(double xDistance, double yDistance);
 };
 
 StandingDesk::StandingDesk(float startSittingHeight, float startStandingHeight) :
@@ -151,6 +153,16 @@ int StandingDesk::maxOutHeight(float incrementSize)
     return numSteps;
 }
 
+void StandingDesk::getDrawerPosition()
+{
+    std::cout << "The desk drawer is currently " << this->drawerLocation << "." << std::endl;
+}
+
+void StandingDesk::reportRollDistance(double xDistance, double yDistance)
+{
+    std::cout << "The desk rolled " << this->rollDesk(xDistance, yDistance) << " feet." << std::endl;
+}
+
 /*
  copied UDT 2:
  */
@@ -177,6 +189,7 @@ struct GuitarAmp
         int selectImpedance(int impedance = 8);
         void turnOnStandby();
         bool waitUntilWarm(double targetTemp);
+        void reportTopology();
     };
 
     PowerAmp powerAmp;
@@ -237,6 +250,11 @@ bool GuitarAmp::PowerAmp::waitUntilWarm(double targetTemp)
         currentTemp += 25.3; 
     }
     return true;
+}
+
+void GuitarAmp::PowerAmp::reportTopology()
+{
+     std::cout << "The power amp has a " << this->ampTopology << " configuration." << std::endl;
 }
 
 
@@ -315,6 +333,7 @@ struct PowerStrip
         void tripGFCI();
         float getCurrentPower();
         bool isPlugInstalled();
+        void confirmPlugInstalled();
     };
 
     Outlet outlet1;
@@ -363,6 +382,12 @@ bool PowerStrip::Outlet::isPlugInstalled()
     else               { std::cout << "Outlet " << outletNum << " does not have a plug installed. " << std::endl; }
     
     return plugInstalled; 
+}
+
+void PowerStrip::Outlet::confirmPlugInstalled()
+{
+    if (this->isPlugInstalled()) 
+        std::cout << "After running insertPlug function, the isPlugInstalled function verifies plug is installed." << std::endl;
 }
 
 PowerStrip::PowerStrip() : 
@@ -450,6 +475,7 @@ struct HomeOffice
     ~HomeOffice();
     void turnOnAndConfigure(float standingHeight, float sittingHeight, std::string startingConfig);
     std::string switchConfiguration();
+    void reportNumOutlets();
 };
 
 HomeOffice::HomeOffice()
@@ -503,6 +529,11 @@ std::string HomeOffice::switchConfiguration()
     return standingDesk.currentConfig;
 }
 
+void HomeOffice::reportNumOutlets()
+{
+    std::cout << "The powerstrip has " << this->powerStrip.numOutlets << " outlets." << std::endl;
+}
+
 /*
  new UDT 5:
  with 2 member functions
@@ -516,6 +547,7 @@ struct GuitarRack
     ~GuitarRack();
     void startupGuitarRack();
     double playDistorted(double inputVoltage);
+    void reportAmpOutput(double inputVoltage);
 };
 
 GuitarRack::GuitarRack()
@@ -535,7 +567,7 @@ void GuitarRack::startupGuitarRack()
     powerStrip.insertPlug(2);
     std::cout << "Turning on power strip." << std::endl;
     powerStrip.enablePower();
-    std::cout << "Warming up amplifier";
+    std::cout << "Warming up amplifier" << std::endl;
     guitarAmp.turnOnAmp();
 }
 
@@ -547,6 +579,12 @@ double GuitarRack::playDistorted(double inputVoltage)
     guitarAmp.adjustGainForTargetOutput(inputVoltage, 5.3);
     return guitarAmp.amplifyGuitar(inputVoltage);
 }
+
+void GuitarRack::reportAmpOutput(double inputVoltage)
+{
+    std::cout << "Amp output is " << this->guitarAmp.amplifyGuitar(inputVoltage) << std::endl;
+}
+
 /*
  MAKE SURE YOU ARE NOT ON THE MASTER BRANCH
 
@@ -568,21 +606,28 @@ int main()
     GuitarAmp guitarAmp;
 
     std::cout << "The desk drawer is currently " << standingDesk.drawerLocation << "." << std::endl;
+    standingDesk.getDrawerPosition();
     standingDesk.slideDrawer();
+
     standingDesk.changeHeight(5.1f);
     std::cout << "The desk rolled " << standingDesk.rollDesk(1.5, 3.7) << " feet." << std::endl;
+    standingDesk.reportRollDistance(1.5, 3.7);
 
     std::cout << "-----------------------" << std::endl;
     
     powerStrip.enablePower();
     powerStrip.outlet1.tripGFCI();
     powerStrip.outlet2.currentPower = 1.3f;
+    std::cout << "Outlet 2 is supplying " << powerStrip.outlet2.currentPower << " watts of power." <<std::endl;
+    powerStrip.outlet2.getCurrentPower();
     powerStrip.insertPlug(3);
 
     if (powerStrip.outlet3.isPlugInstalled())
     {
         std::cout << "After running insertPlug function, the isPlugInstalled function verifies plug is installed." << std::endl;
     }
+
+    powerStrip.outlet3.confirmPlugInstalled();
 
     powerStrip.getPowerStripPower();
     powerStrip.cyclePower(3);
@@ -596,10 +641,14 @@ int main()
     guitarAmp.adjustReverbAmount(0.3);
     guitarAmp.switchChannel(2);
     guitarAmp.adjustGainForTargetOutput(0.01, 10.1);
+    std::cout << "The power amp has a " << guitarAmp.powerAmp.ampTopology << " configuration." << std::endl;
+    guitarAmp.powerAmp.reportTopology();
 
     std::cout << "-----------------------" << std::endl;
 
     HomeOffice homeOffice;
+    std::cout << "The powerstrip has " << homeOffice.powerStrip.numOutlets << " outlets." << std::endl;
+    homeOffice.reportNumOutlets();
     homeOffice.switchConfiguration();
 
     GuitarRack guitarRack;
@@ -609,6 +658,7 @@ int main()
     for (double i = 0.3; i < 0.7; i += 0.1)
     {
         std::cout << "Amp output is " << guitarRack.guitarAmp.amplifyGuitar(i) << std::endl;
+        guitarRack.reportAmpOutput(i);
     }
     
     std::cout << "-----------------------" << std::endl;
