@@ -67,11 +67,10 @@ void someMemberFunction(const Axe& axe);
  Suppress them by adding -Wno-exit-time-destructors to the .replit file with the other warning suppression flags
  */
 
-
-
-
 #include <iostream>
 #include <cmath>
+#include "LeakedObjectDetector.h"
+
 /*
  copied UDT 1:
  */
@@ -97,6 +96,8 @@ void someMemberFunction(const Axe& axe);
     int maxOutHeight(float incrementSize);
     void getDrawerPosition();
     void reportRollDistance(double xDistance, double yDistance);
+
+    JUCE_LEAK_DETECTOR(StandingDesk)
 };
 
 StandingDesk::StandingDesk(float startSittingHeight, float startStandingHeight) :
@@ -164,6 +165,16 @@ void StandingDesk::reportRollDistance(double xDistance, double yDistance)
     std::cout << "The desk rolled " << this->rollDesk(xDistance, yDistance) << " feet." << std::endl;
 }
 
+struct StandingDeskWrapper
+{
+    StandingDeskWrapper (StandingDesk* ptr) : ptrToStandingDesk(ptr){}
+    ~StandingDeskWrapper()
+    {
+        delete ptrToStandingDesk;
+    }
+    StandingDesk* ptrToStandingDesk;
+};
+
 /*
  copied UDT 2:
  */
@@ -191,6 +202,8 @@ struct GuitarAmp
         void turnOnStandby();
         bool waitUntilWarm(double targetTemp);
         void reportTopology();
+        
+        JUCE_LEAK_DETECTOR(PowerAmp)
     };
 
     PowerAmp powerAmp;
@@ -202,6 +215,8 @@ struct GuitarAmp
     double adjustReverbAmount(double reverbGain = 1.0);
     int switchChannel(int currentChannel, int newChannel = 0);
     void adjustGainForTargetOutput(double inputVoltage = 0.0, double targetOutput = 0.0);
+
+    JUCE_LEAK_DETECTOR(GuitarAmp)
 };
 
 GuitarAmp::PowerAmp::PowerAmp() :
@@ -309,6 +324,16 @@ void GuitarAmp::adjustGainForTargetOutput(double inputVoltage, double targetOutp
     std::cout << "Corrected output gain is " << powerAmp.gain << "." << std::endl;
 }
 
+struct GuitarAmpWrapper
+{
+    GuitarAmpWrapper (GuitarAmp* ptr) : ptrToGuitarAmp(ptr){}
+    ~GuitarAmpWrapper()
+    {
+        delete ptrToGuitarAmp;
+    }
+    GuitarAmp* ptrToGuitarAmp;
+};
+
 /*
  copied UDT 3:
  */
@@ -335,6 +360,9 @@ struct PowerStrip
         float getCurrentPower();
         bool isPlugInstalled();
         void confirmPlugInstalled();
+
+        JUCE_LEAK_DETECTOR(Outlet)
+
     };
 
     Outlet outlet1;
@@ -348,6 +376,8 @@ struct PowerStrip
     void enablePower();
     void disablePower();
     void cyclePower(int numCycles);
+
+    JUCE_LEAK_DETECTOR(PowerStrip)
 };
 
 int PowerStrip::Outlet::numOutlets = 0;
@@ -463,6 +493,16 @@ void PowerStrip::cyclePower(int numCycles)
     
 }
 
+struct PowerStripWrapper
+{
+    PowerStripWrapper (PowerStrip* ptr) : ptrToPowerStrip(ptr){}
+    ~PowerStripWrapper()
+    {
+        delete ptrToPowerStrip;
+    }
+    PowerStrip* ptrToPowerStrip;
+};
+
 /*
  new UDT 4:
  with 2 member functions
@@ -477,6 +517,8 @@ struct HomeOffice
     void turnOnAndConfigure(float standingHeight, float sittingHeight, std::string startingConfig);
     std::string switchConfiguration();
     void reportNumOutlets();
+
+    JUCE_LEAK_DETECTOR(HomeOffice)
 };
 
 HomeOffice::HomeOffice()
@@ -535,6 +577,18 @@ void HomeOffice::reportNumOutlets()
     std::cout << "The powerstrip has " << this->powerStrip.numOutlets << " outlets." << std::endl;
 }
 
+// JUCE_LEAK_DETECTOR(HomeOffice)
+
+struct HomeOfficeWrapper
+{
+    HomeOfficeWrapper (HomeOffice* ptr) : ptrToHomeOffice(ptr){}
+    ~HomeOfficeWrapper()
+    {
+        delete ptrToHomeOffice;
+    }
+    HomeOffice* ptrToHomeOffice;
+};
+
 /*
  new UDT 5:
  with 2 member functions
@@ -549,6 +603,8 @@ struct GuitarRack
     void startupGuitarRack();
     double playDistorted(double inputVoltage);
     void reportAmpOutput(double inputVoltage);
+
+    JUCE_LEAK_DETECTOR(GuitarRack)
 };
 
 GuitarRack::GuitarRack()
@@ -586,6 +642,18 @@ void GuitarRack::reportAmpOutput(double inputVoltage)
     std::cout << "Amp output is " << this->guitarAmp.amplifyGuitar(inputVoltage) << std::endl;
 }
 
+// JUCE_LEAK_DETECTOR(GuitarRack)
+
+struct GuitarRackWrapper
+{
+    GuitarRackWrapper (GuitarRack* ptr) : ptrToGuitarRack(ptr){}
+    ~GuitarRackWrapper()
+    {
+        delete ptrToGuitarRack;
+    }
+    GuitarRack* ptrToGuitarRack;
+};
+
 /*
  MAKE SURE YOU ARE NOT ON THE MASTER BRANCH
 
@@ -602,64 +670,64 @@ void GuitarRack::reportAmpOutput(double inputVoltage)
 
 int main()
 {
-    StandingDesk standingDesk {36.f, 48.f};
-    PowerStrip powerStrip;
-    GuitarAmp guitarAmp;
+    StandingDeskWrapper standingDeskWrapper(new StandingDesk{36.f, 48.f});
+    PowerStripWrapper powerStripWrapper(new PowerStrip());
+    GuitarAmpWrapper guitarAmpWrapper(new GuitarAmp());
 
-    std::cout << "The desk drawer is currently " << standingDesk.drawerLocation << "." << std::endl;
-    standingDesk.getDrawerPosition();
-    standingDesk.slideDrawer();
+    std::cout << "The desk drawer is currently " << standingDeskWrapper.ptrToStandingDesk->drawerLocation << "." << std::endl;
+    standingDeskWrapper.ptrToStandingDesk->getDrawerPosition();
+    standingDeskWrapper.ptrToStandingDesk->slideDrawer();
 
-    standingDesk.changeHeight(5.1f);
-    std::cout << "The desk rolled " << standingDesk.rollDesk(1.5, 3.7) << " feet." << std::endl;
-    standingDesk.reportRollDistance(1.5, 3.7);
+    standingDeskWrapper.ptrToStandingDesk->changeHeight(5.1f);
+    std::cout << "The desk rolled " << standingDeskWrapper.ptrToStandingDesk->rollDesk(1.5, 3.7) << " feet." << std::endl;
+    standingDeskWrapper.ptrToStandingDesk->reportRollDistance(1.5, 3.7);
 
     std::cout << "-----------------------" << std::endl;
     
-    powerStrip.enablePower();
-    powerStrip.outlet1.tripGFCI();
-    powerStrip.outlet2.currentPower = 1.3f;
-    std::cout << "Outlet 2 is supplying " << powerStrip.outlet2.currentPower << " watts of power." <<std::endl;
-    powerStrip.outlet2.getCurrentPower();
-    powerStrip.insertPlug(3);
+    powerStripWrapper.ptrToPowerStrip->enablePower();
+    powerStripWrapper.ptrToPowerStrip->outlet1.tripGFCI();
+    powerStripWrapper.ptrToPowerStrip->outlet2.currentPower = 1.3f;
+    std::cout << "Outlet 2 is supplying " << powerStripWrapper.ptrToPowerStrip->outlet2.currentPower << " watts of power." <<std::endl;
+    powerStripWrapper.ptrToPowerStrip->outlet2.getCurrentPower();
+    powerStripWrapper.ptrToPowerStrip->insertPlug(3);
 
-    if (powerStrip.outlet3.isPlugInstalled())
+    if (powerStripWrapper.ptrToPowerStrip->outlet3.isPlugInstalled())
     {
         std::cout << "After running insertPlug function, the isPlugInstalled function verifies plug is installed." << std::endl;
     }
 
-    powerStrip.outlet3.confirmPlugInstalled();
+    powerStripWrapper.ptrToPowerStrip->outlet3.confirmPlugInstalled();
 
-    powerStrip.getPowerStripPower();
-    powerStrip.cyclePower(3);
+    powerStripWrapper.ptrToPowerStrip->getPowerStripPower();
+    powerStripWrapper.ptrToPowerStrip->cyclePower(3);
     
     std::cout << "-----------------------" << std::endl;
 
-    guitarAmp.turnOnAmp();
-    guitarAmp.powerAmp.changeGain(0.5);
-    guitarAmp.powerAmp.selectImpedance(4);
-    guitarAmp.amplifyGuitar(0.01);
-    guitarAmp.adjustReverbAmount(0.3);
-    guitarAmp.switchChannel(2);
-    guitarAmp.adjustGainForTargetOutput(0.01, 10.1);
-    std::cout << "The power amp has a " << guitarAmp.powerAmp.ampTopology << " configuration." << std::endl;
-    guitarAmp.powerAmp.reportTopology();
+    guitarAmpWrapper.ptrToGuitarAmp->turnOnAmp();
+    guitarAmpWrapper.ptrToGuitarAmp->powerAmp.changeGain(0.5);
+    guitarAmpWrapper.ptrToGuitarAmp->powerAmp.selectImpedance(4);
+    guitarAmpWrapper.ptrToGuitarAmp->amplifyGuitar(0.01);
+    guitarAmpWrapper.ptrToGuitarAmp->adjustReverbAmount(0.3);
+    guitarAmpWrapper.ptrToGuitarAmp->switchChannel(2);
+    guitarAmpWrapper.ptrToGuitarAmp->adjustGainForTargetOutput(0.01, 10.1);
+    std::cout << "The power amp has a " << guitarAmpWrapper.ptrToGuitarAmp->powerAmp.ampTopology << " configuration." << std::endl;
+    guitarAmpWrapper.ptrToGuitarAmp->powerAmp.reportTopology();
 
     std::cout << "-----------------------" << std::endl;
 
-    HomeOffice homeOffice;
-    std::cout << "The powerstrip has " << homeOffice.powerStrip.numOutlets << " outlets." << std::endl;
-    homeOffice.reportNumOutlets();
-    homeOffice.switchConfiguration();
+    HomeOfficeWrapper homeOfficeWrapper(new HomeOffice());
+    std::cout << "The powerstrip has " << homeOfficeWrapper.ptrToHomeOffice->powerStrip.numOutlets << " outlets." << std::endl;
+    homeOfficeWrapper.ptrToHomeOffice->reportNumOutlets();
+    homeOfficeWrapper.ptrToHomeOffice->switchConfiguration();
 
-    GuitarRack guitarRack;
+    GuitarRackWrapper guitarRackWrapper(new GuitarRack());
     std::cout << "Getting amp set for distortion." << std::endl;
-    guitarRack.playDistorted(0.1);
+    guitarRackWrapper.ptrToGuitarRack->playDistorted(0.1);
     std::cout << "Amplifying guitar." << std::endl;
     for (double i = 0.3; i < 0.7; i += 0.1)
     {
-        std::cout << "Amp output is " << guitarRack.guitarAmp.amplifyGuitar(i) << std::endl;
-        guitarRack.reportAmpOutput(i);
+        std::cout << "Amp output is " << guitarRackWrapper.ptrToGuitarRack->guitarAmp.amplifyGuitar(i) << std::endl;
+        guitarRackWrapper.ptrToGuitarRack->reportAmpOutput(i);
     }
     
     std::cout << "-----------------------" << std::endl;
