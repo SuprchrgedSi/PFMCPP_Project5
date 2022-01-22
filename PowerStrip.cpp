@@ -19,9 +19,9 @@ PowerStrip::~PowerStrip()
 
 int PowerStrip::insertPlug(int outletNum) 
 {
-    if (outlet1.outletNum == outletNum) outlet1.plugInstalled = true;
-    else if (outlet2.outletNum == outletNum) outlet2.plugInstalled = true;
-    else if (outlet3.outletNum == outletNum) outlet3.plugInstalled = true;
+    if (outlet1.outletNum == outletNum) { outlet1.plugInstalled = true; }
+    else if (outlet2.outletNum == outletNum) { outlet2.plugInstalled = true; }
+    else if (outlet3.outletNum == outletNum) { outlet3.plugInstalled = true; }
     else 
     {
         std::cout << "There is no outlet number " << outletNum << " in power strip";

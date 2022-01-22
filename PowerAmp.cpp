@@ -9,23 +9,18 @@ powerState("off")
     std::cout << "PowerAmp" << std::endl; 
 }
 
-
-
 PowerAmp::~PowerAmp()
 {
     std::cout << "PowerAmp object destroyed." << std::endl;
 }
-void 
 
-PowerAmp::changeGain(double gainAdjustment) 
+void PowerAmp::changeGain(double gainAdjustment) 
 { 
     gain *= gainAdjustment; 
     std::cout << "The new power amp gain is " << gain << "." << std::endl;
 }
 
-void 
-
-PowerAmp::enableAmpStandby() 
+void PowerAmp::enableAmpStandby() 
 { 
     std::cout << "The power amp is now in standby." << std::endl;
     powerState = "standby"; 
@@ -35,9 +30,7 @@ PowerAmp::enableAmpStandby()
 
 }
 
-int 
-
-PowerAmp::selectImpedance(int impedance) 
+int PowerAmp::selectImpedance(int impedance) 
 { 
     if (impedance != outputImpedance)
     {
@@ -47,9 +40,7 @@ PowerAmp::selectImpedance(int impedance)
     return impedance;
 }
 
-bool 
-
-PowerAmp::waitUntilWarm(double targetTemp)
+bool PowerAmp::waitUntilWarm(double targetTemp)
 {
     double currentTemp = 72;
     while (currentTemp < targetTemp)
@@ -60,9 +51,7 @@ PowerAmp::waitUntilWarm(double targetTemp)
     return true;
 }
 
-void 
-
-PowerAmp::reportTopology()
+void PowerAmp::reportTopology()
 {
      std::cout << "The power amp has a " << this->ampTopology << " configuration." << std::endl;
 }
